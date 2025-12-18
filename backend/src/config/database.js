@@ -1,16 +1,37 @@
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const { Sequelize } = require('sequelize');
 
-// Connexion à la base de données (centralisée et sécurisée)
-const db = new sqlite3.Database(
-  path.join(__dirname, '../database.db'),
-  (err) => {
-    if (err) {
-      console.error('Erreur connexion DB :', err.message);
-    } else {
-      console.log('Connexion DB OK ✅');
-    }
+const sequelize = new Sequelize(
+  process.env.DB_NAME,
+  process.env.DB_USER,
+  process.env.DB_PASSWORD,
+  {
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    dialect: 'mariadb',
+    logging: false,
   }
 );
 
-module.exports = db;
+// Import des modèles
+const UserModel = require('../models/User');
+
+const User = UserModel(sequelize);
+
+const connectDatabase = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log('Database connection established successfully.');
+
+    await sequelize.sync();
+    console.log('Database synchronized.');
+  } catch (error) {
+    console.error('Unable to connect to database:', error.message);
+    process.exit(1);
+  }
+};
+
+module.exports = {
+  sequelize,
+  connectDatabase,
+  User,
+};

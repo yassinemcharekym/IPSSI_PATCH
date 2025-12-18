@@ -1,9 +1,13 @@
-const db = require('../config/database');
+const { User } = require('../config/datasource');
 
-function getStatus(callback) {
-  callback(null, { message: 'Backend sécurisé OK ✅' });
+class UserService {
+  static async createUser(name, password) {
+    return await User.create({ name, password });
+  }
+
+  static async getAllUsers() {
+    return await User.findAll();
+  }
 }
 
-module.exports = {
-  getStatus
-};
+module.exports = UserService;
